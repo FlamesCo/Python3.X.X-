@@ -1,0 +1,40 @@
+import argparse
+import openai
+import os
+
+def main(args):
+    input_file = args.input
+    output_file = args.output
+
+    compile_source_code(input_file, output_file)
+
+def compile_source_code(input_file, output_file):
+    openai.api_key = "your GPT-3.5 Turbo API key"
+
+    with open(input_file, 'r') as file:
+        source_code = file.read()
+
+    prompt = f"Compile the following Python 3.11 source code into a shell script (.sh) file:\n{source_code}\n---\n"
+
+    response = openai.Completion.create(
+        engine="text-davinci-003", # The GPT-3.5 Turbo engine
+        prompt=prompt,
+        max_tokens=1024,
+        n=1,
+        stop=None,
+        temperature=0.7,
+    )
+
+    shell_content = response.choices[0].text.strip()
+
+    with open(output_file, 'w') as file:
+        file.write('#!/bin/bash\n')
+        file.write(shell_content)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Python 3.11 GPT-3.5 Turbo Compiler for generating .sh files")
+    parser.add_argument("-i", "--input", type=str, metavar="INPUT", help="Input Python 3.11 file", required=True)
+    parser.add_argument("-o", "--output", type=str, metavar="OUTPUT", help="Output .sh file", required=True)
+    args = parser.parse_args()
+
+    main(args)
